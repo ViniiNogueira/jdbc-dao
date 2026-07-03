@@ -1,6 +1,7 @@
 package model.entities;
 
 import java.io.Serializable;
+
 import java.util.Date;
 import java.util.Objects;
 
@@ -32,8 +33,8 @@ public class Seller implements Serializable {
         this.baseSalary = baseSalary;
     }
 
-    public Date getBirthDate() {
-        return birthDate;
+    public Date getBirthDate(Date birthDate) {
+        return this.birthDate;
     }
 
     public void setBirthDate(Date birthDate) {
@@ -68,6 +69,10 @@ public class Seller implements Serializable {
         this.name = name;
     }
 
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -83,11 +88,11 @@ public class Seller implements Serializable {
     @Override
     public String toString() {
         return "Seller{" +
-                "baseSalary=" + baseSalary +
-                ", id=" + id +
+                "id=" + id +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", birthDate=" + birthDate +
+                ", baseSalary=" + baseSalary +
                 ", department=" + department +
                 '}';
     }
