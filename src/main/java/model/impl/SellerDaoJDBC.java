@@ -6,10 +6,7 @@ import model.entities.Department;
 import model.entities.Seller;
 import db.DbException;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,18 +21,88 @@ public class SellerDaoJDBC implements SellerDao {
     }
 
     @Override
-    public void insert(Seller seller) {
+    public void insert(Seller sell) {
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+//        faz o try , o script SQL(ps = connection..preparedStatement ) e -> executeQuery
+        try {
+            ps = connection.prepareStatement(
+                    "INSERT INTO seller" +
+                    "(Name, Email, BirthDate, BaseSalary, DepartmentId)\n" +
+                    "VALUES (?, ?, ?, ?, ?)" ,
+                    Statement.RETURN_GENERATED_KEYS);
 
+            ps.setString(1 , sell.getName());
+            ps.setString(2, sell.getEmail());
+            ps.setDate(3 , new java.sql.Date(sell.getBirthDate().getTime()));
+            ps.setDouble(4, sell.getBaseSalary());
+            ps.setInt(5,sell.getDepartment().getId());
+
+            int linhasAfetadas = ps.executeUpdate();
+
+            if (linhasAfetadas > 0) {
+                rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    int id = rs.getInt(1);
+                    sell.setId(id);
+                }
+            } else {
+                throw new DbException("Erro ao inserir, nenhuma linha afetada");
+            }
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } finally {
+            DB.closeStatement(ps);
+            DB.closeResultSet(rs);
+        }
     }
 
     @Override
-    public void update(Seller seller) {
+    public void update(Seller sell) {
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            ps = connection.prepareStatement(
+                    " UPDATE seller " +
+                    " SET Name = ?, Email = ?, BirthDate = ?, BaseSalary = ?, DepartmentId = ? " +
+                    " WHERE Id = ? " );
+
+            ps.setString(1 , sell.getName());
+            ps.setString(2, sell.getEmail());
+            ps.setDate(3 , new java.sql.Date(sell.getBirthDate().getTime()));
+            ps.setDouble(4, sell.getBaseSalary());
+            ps.setInt(5,sell.getDepartment().getId());
+            ps.setInt(6 , sell.getId());
+
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } finally {
+            DB.closeStatement(ps);
+        }
 
     }
 
     @Override
     public void deletebyId(Integer id) {
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
+        try {
+            ps = connection.prepareStatement(
+                    "DELETE FROM seller" +
+                    " WHERE Id = ?");
+
+            ps.setInt(1 , id);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } finally {
+            DB.closeStatement(ps);
+        }
     }
 
     @Override
@@ -128,7 +195,7 @@ public class SellerDaoJDBC implements SellerDao {
     }
 
     @Override
-    public List<Seller> findByDepartment(Department departmentId) {
+    public List<Seller> findByDepartment(Department department) {
         PreparedStatement ps = null;
         ResultSet rs = null;
 
@@ -140,7 +207,7 @@ public class SellerDaoJDBC implements SellerDao {
                             "WHERE DepartmentId = ?\n" +
                             "ORDER BY Name");
 
-            ps.setInt(1, departmentId.getId());
+            ps.setInt(1, department.getId());
 
             rs = ps.executeQuery();
 

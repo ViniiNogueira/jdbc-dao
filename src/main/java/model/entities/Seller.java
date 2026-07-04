@@ -33,7 +33,7 @@ public class Seller implements Serializable {
         this.baseSalary = baseSalary;
     }
 
-    public Date getBirthDate(Date birthDate) {
+    public Date getBirthDate() {
         return this.birthDate;
     }
 
